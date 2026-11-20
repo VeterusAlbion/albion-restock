@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Albion — завоз на рынки</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--tx:#1d1d1b;--mut:#6b6a63;--line:#e2dfd5;--acc:#b4531f;--accbg:#fbeadf;--ok:#2f7d4f;--okbg:#e3f3ea;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16150f;--card:#201e17;--tx:#efece3;--mut:#9b988b;--line:#34312600;--line:#38352a;--acc:#e48a52;--accbg:#3a2417;--ok:#6fcf97;--okbg:#17301f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#16150f;--card:#201e17;--tx:#efece3;--mut:#9b988b;--line:#38352a;--acc:#e48a52;--accbg:#3a2417;--ok:#6fcf97;--okbg:#17301f;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px 14px 40px}
+h1{font-size:20px;margin:0 0 2px}
+.sub{color:var(--mut);margin:0 0 14px;font-size:13px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:999px;font:inherit;cursor:pointer}
+.tab.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.card h2{font-size:14px;margin:0 0 8px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--accbg);color:var(--acc);border-radius:8px;padding:4px 9px;font-weight:600}
+.chip b{font-size:16px}
+.muted{color:var(--mut)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
+th{font-size:12px;font-weight:600;color:var(--mut)}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:1;min-width:150px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.cell{display:inline-flex;align-items:center;gap:2px}
+.cell button{width:26px;height:30px;border:1px solid var(--line);background:var(--bg);color:var(--tx);border-radius:7px;font-size:16px;cursor:pointer;padding:0}
+.cell input{width:44px;height:30px;text-align:center;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--tx);font:inherit;font-weight:600}
+.cell input.has{background:var(--accbg);border-color:var(--acc);color:var(--acc)}
+input[type=number]::-webkit-inner-spin-button{display:none}
+input[type=number]{-moz-appearance:textfield}
+.tot{font-weight:700}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.ok{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.btn.del{color:#c0392b}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.city{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.city header{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-weight:700;border-bottom:1px solid var(--line)}
+.city ul{list-style:none;margin:0;padding:4px 12px}
+.city li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.city li:last-child{border:0}
+.city li .q{font-weight:800;font-size:18px;color:var(--acc);min-width:36px}
+.city li .n{flex:1}
+.city footer{padding:8px 12px;border-top:1px solid var(--line)}
+.empty{padding:14px 12px;color:var(--mut)}
+.form{display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+.form label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:3px}
+.form input,.form select{height:36px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;padding:0 8px}
+.form input[list]{min-width:220px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);gap:8px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--tx);font:12px monospace;padding:8px;margin-top:8px}
+.hint{color:var(--mut);font-size:12px;min-width:26px;text-align:left}
+.ic{display:inline-block;min-width:1.5em;text-align:center;margin-right:4px;vertical-align:middle}
+.ico{width:30px;height:30px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Albion — завоз на рынки</h1>
+<p class="sub">Укажи, сколько чего нужно завести в каждый город. Данные хранятся в этом браузере.</p>
+<div class="tabs" id="tabs"></div>
+<div id="view"></div>
+</div>
+<script>
+const K='albion-restock-v1';
+const CITIES=[
+{id:'ml',n:'Martlock',c:'#5a7fb8'},
+{id:'tf',n:'Thetford',c:'#9a5aa8'},
+{id:'fs',n:'Fort Sterling',c:'#8aa0b8'},
+{id:'ly',n:'Lymhurst',c:'#4f9a5a'},
+{id:'bw',n:'Bridgewatch',c:'#c9822b'},
+{id:'br',n:'Brecilien',c:'#c25a7a'}];
+const PRESETS=['Призыватель теней','Кровопускатель','Призма вечного холода','Леденящий вой','Меч-кладенец','Грозовой посох','Проклятый посох','Святой посох'];
+const CAT=[["2H_TOOL_PICK_AVALON","Авалонская кирка","Avalonian Pickaxe"],["2H_TOOL_HAMMER_AVALON","Авалонская кувалда","Avalonian Stone Hammer"],["2H_TOOL_FISHINGROD_AVALON","Авалонская удочка","Avalonian Fishing Rod"],["2H_TOOL_SIEGEHAMMER_AVALON","Авалонский осадный молот","Avalonian Siege Hammer"],["2H_TOOL_KNIFE_AVALON","Авалонский свежевальный нож","Avalonian Skinning Knife"],["2H_TOOL_SICKLE_AVALON","Авалонский серп","Avalonian Sickle"],["2H_TOOL_AXE_AVALON","Авалонский топор","Avalonian Axe"],["2H_SCYTHE_HELL","Адская коса","Infernal Scythe"],["2H_KNUCKLES_HELL","Адские длани","Hellfire Hands"],["2H_INFERNOSTAFF","Адский посох","Infernal Staff"],["2H_HALBERD","Алебарда","Halberd"],["2H_CROSSBOW","Арбалет","Crossbow"],["2H_ARCANESTAFF_CRYSTAL","Астральный посох","Astral Staff"],["MAIN_HOLYSTAFF_AVALON","Благодатный посох","Hallowfall"],["2H_WARBOW","Боевой лук","Warbow"],["MAIN_AXE","Боевой топор","Battleaxe"],["2H_QUARTERSTAFF","Боевой шест","Quarterstaff"],["2H_KNUCKLES_SET2","Боевые наручи","Battle Bracers"],["2H_DIVINESTAFF","Божественный посох","Divine Staff"],["2H_NATURESTAFF","Большой древесный посох","Great Nature Staff"],["2H_ARCANESTAFF","Большой мистический посох","Great Arcane Staff"],["2H_HAMMER","Большой молот","Great Hammer"],["2H_FROSTSTAFF","Большой морозный посох","Great Frost Staff"],["2H_FIRESTAFF","Большой огненный посох","Great Fire Staff"],["2H_CURSEDSTAFF","Большой проклятый посох","Great Cursed Staff"],["2H_HOLYSTAFF","Большой священный посох","Great Holy Staff"],["2H_AXE","Большой топор","Greataxe"],["MAIN_MACE","Булава","Mace"],["2H_MACE_MORGANA","Булава Камланна","Camlann Mace"],["MAIN_MACE_HELL","Булава инкуба","Incubus Mace"],["MAIN_ARCANESTAFF_UNDEAD","Ведьмовской посох","Witchwork Staff"],["2H_DUALSICKLE_UNDEAD","Вестники смерти","Deathgivers"],["2H_KNUCKLES_MORGANA","Вороний цестус","Ravenstrike Cestus"],["2H_BOW_HELL","Воющий лук","Wailing Bow"],["MAIN_CURSEDSTAFF_UNDEAD","Гибельный посох","Lifecurse Staff"],["2H_GLAIVE","Глефа","Glaive"],["2H_GLAIVE_CRYSTAL","Глефа разлома","Rift Glaive"],["2H_FIRESTAFF","Гнев Vendetta","Wrath"],["MAIN_MACE_CRYSTAL","Грозовой монарх","Dreadstorm Monarch"],["2H_DEMONICSTAFF","Демонический посох","Demonic Staff"],["2H_WILDSTAFF","Дикий посох","Wild Staff"],["2H_HAMMER_AVALON","Длань правосудия","Hand of Justice"],["2H_LONGBOW","Длинный лук","Longbow"],["MAIN_NATURESTAFF","Древесный посох","Nature Staff"],["MAIN_NATURESTAFF_KEEPER","Друидский посох","Druidic Staff"],["2H_IRONCLADEDSTAFF","Железный посох","Iron-clad Staff"],["2H_ENIGMATICSTAFF","Загадочный посох","Enigmatic Staff"],["2H_ICEGAUNTLETS_HELL","Заледенелый посох","Icicle Staff"],["2H_TOOL_TRACKING","Инструменты следопыта","Tracking Toolkit"],["2H_QUARTERSTAFF_AVALON","Искатель Грааля","Grailseeker"],["2H_DUALCROSSBOW_CRYSTAL","Искрящиеся бластеры","Arclight Blasters"],["MAIN_ROCKMACE_KEEPER","Каменная булава","Bedrock Mace"],["MAIN_DAGGER","Кинжал","Dagger"],["2H_TOOL_PICK","Кирка","Pickaxe"],["2H_CLAYMORE","Клеймор","Claymore"],["MAIN_SWORD_CRYSTAL","Клинок бесконечности","Infinity Blade"],["MAIN_DAGGER_HELL","Клык демона","Demonfang"],["2H_CLAWPAIR","Когти","Claws"],["MAIN_SPEAR","Копье","Spear"],["MAIN_SPEAR_LANCE_AVALON","Копье рассвета","Daybreaker"],["MAIN_SPEAR_KEEPER","Копье цапли","Heron Spear"],["MAIN_SCIMITAR_MORGANA","Королевский меч","Clarent Blade"],["2H_TWINSCYTHE_HELL","Коса душ","Soulscythe"],["MAIN_RAPIER_MORGANA","Кровопускатель","Bloodletter"],["2H_TOOL_HAMMER","Кувалда","Stone Hammer"],["MAIN_NATURESTAFF_CRYSTAL","Кузнечный посох","Forgebark Staff"],["2H_KNUCKLES_AVALON","Кулаки Авалона","Fists of Avalon"],["MAIN_1HCROSSBOW","Легкий арбалет","Light Crossbow"],["MAIN_FROSTSTAFF_AVALON","Леденящий вой","Chillhowl"],["2H_GLACIALSTAFF","Ледяной посох","Glacial Staff"],["2H_BOW","Лук","Bow"],["2H_BOW_KEEPER","Лук Бадона","Bow of Badon"],["2H_BOW_CRYSTAL","Лук небесного странника","Skystrider Bow"],["2H_DUALAXE_KEEPER","Медвежьи лапы","Bear Paws"],["2H_KNUCKLES_KEEPER","Медвежьи перчатки","Ursine Maulers"],["2H_CLEAVER_HELL","Меч резни","Carving Sword"],["MAIN_ARCANESTAFF","Мистический посох","Arcane Staff"],["2H_HAMMER_UNDEAD","Могильный молот","Tombhammer"],["MAIN_HAMMER","Молот","Hammer"],["2H_HAMMER_CRYSTAL","Молот истинных снарядов","Truebolt Hammer"],["2H_DUALHAMMER_HELL","Молоты кузни","Forge Hammers"],["2H_FLAIL","Моргенштерн","Morning Star"],["MAIN_FROSTSTAFF","Морозный посох","Frost Staff"],["2H_SHAPESHIFTER_SET2","Непреодолимый посох","Rootbound Staff"],["2H_NATURESTAFF_KEEPER","Неудержимый посох","Rampant Staff"],["MAIN_FIRESTAFF","Огненный посох","Fire Staff"],["2H_ARCANESTAFF_HELL","Оккультный посох","Occult Staff"],["2H_CROSSBOWLARGE_MORGANA","Осадный арбалет","Siegebow"],["2H_TOOL_SIEGEHAMMER","Осадный молот","Siege Hammer"],["2H_DOUBLEBLADEDSTAFF","Острый шест","Double Bladed Staff"],["2H_HARPOON_HELL","Охотник за душами","Spirithunter"],["2H_HALBERD_MORGANA","Падальщик","Carrioncaller"],["MAIN_SWORD","Палаш","Broadsword"],["2H_DUALSCIMITAR_UNDEAD","Парные галатины","Galatine Pair"],["2H_DAGGERPAIR_CRYSTAL","Парные истребители","Twin Slayers"],["2H_DAGGERPAIR","Парные кинжалы","Dagger Pair"],["2H_DUALSWORD","Парные мечи","Dual Swords"],["2H_DOUBLEBLADEDSTAFF_CRYSTAL","Парный призрачный клинок","Phantom Twinblade"],["2H_SHAPESHIFTER_SET3","Первобытный посох","Primal Staff"],["2H_KNUCKLES_SET1","Перчатки крушителя","Brawler Gloves"],["2H_ARCANE_RINGPAIR_AVALON","Песнь заката","Evensong"],["2H_FIRE_RINGPAIR_AVALON","Песнь рассвета","Dawnsong"],["2H_SPEAR","Пика","Pike"],["2H_REPEATINGCROSSBOW_UNDEAD","Плачущий арбалет","Weeping Repeater"],["2H_SHAPESHIFTER_MORGANA","Посох Кровавой луны","Bloodmoon Staff"],["2H_SHAPESHIFTER_SET1","Посох бродяги","Prowling Staff"],["2H_HOLYSTAFF_CRYSTAL","Посох возвышения","Exalted Staff"],["MAIN_CURSEDSTAFF_CRYSTAL","Посох гниения","Rotcaller Staff"],["MAIN_NATURESTAFF_AVALON","Посох железного корня","Ironroot Staff"],["MAIN_HOLYSTAFF_MORGANA","Посох жизни","Lifetouch Staff"],["MAIN_FROSTSTAFF_KEEPER","Посох инея","Hoarfrost Staff"],["2H_HOLYSTAFF_UNDEAD","Посох искупления","Redemption Staff"],["MAIN_FIRESTAFF_KEEPER","Посох лесного пожара","Wildfire Staff"],["2H_SHAPESHIFTER_CRYSTAL","Посох неподвижного взгляда","Stillgaze Staff"],["2H_CURSEDSTAFF_MORGANA","Посох обреченности","Damnation Staff"],["2H_HOLYSTAFF_HELL","Посох падших","Fallen Staff"],["MAIN_FIRESTAFF_CRYSTAL","Посох пламенного странника","Flamewalker Staff"],["2H_SHAPESHIFTER_HELL","Посох порождений Ада","Hellspawn Staff"],["2H_NATURESTAFF_HELL","Посох порчи","Blight Staff"],["2H_ROCKSTAFF_KEEPER","Посох равновесия","Staff of Balance"],["2H_FIRESTAFF_HELL","Посох серы","Brimstone Staff"],["2H_COMBATSTAFF_MORGANA","Посох черного монаха","Black Monk Staff"],["2H_ICECRYSTAL_UNDEAD","Призма вечного холода","Permafrost Prism"],["MAIN_CURSEDSTAFF_AVALON","Призыватель теней","Shadowcaller"],["MAIN_CURSEDSTAFF","Проклятый посох","Cursed Staff"],["2H_SKULLORB_HELL","Проклятый череп","Cursed Skull"],["2H_INFERNOSTAFF_MORGANA","Пылающий посох","Blazing Staff"],["2H_AXE_AVALON","Разрушитель миров","Realmbreaker"],["2H_AXE","Рука Кхора","The Hand of Khor"],["2H_SHAPESHIFTER_KEEPER","Рунный посох Земли","Earthrune Staff"],["2H_DUALCROSSBOW_HELL","Самострелы","Boltcasters"],["2H_TOOL_KNIFE","Свежевальный нож","Skinning Knife"],["2H_SHAPESHIFTER_AVALON","Светоч","Lightcaller"],["MAIN_HOLYSTAFF","Священный посох","Holy Staff"],["2H_TOOL_SICKLE","Серп","Sickle"],["2H_KNUCKLES_CRYSTAL","Силовые наручи","Forcepulse Bracers"],["2H_FROSTSTAFF_CRYSTAL","Снежный посох","Arctic Staff"],["2H_ENIGMATICORB_MORGANA","Средоточие злобы","Malevolent Locus"],["2H_CROSSBOW_CANNON_AVALON","Творец энергии","Energy Shaper"],["2H_TOOL_AXE","Топор","Axe"],["2H_TRIDENT_UNDEAD","Трезубец","Trinity Spear"],["2H_BOW_AVALON","Туманный пронзатель","Mistpiercer"],["2H_MACE","Тяжелая булава","Heavy Mace"],["2H_CROSSBOWLARGE","Тяжелый арбалет","Heavy Crossbow"],["2H_TOOL_FISHINGROD","Удочка","Fishing Rod"],["2H_DAGGER_KATAR_AVALON","Укротитель ярости","Bridled Fury"],["2H_DUALMACE_AVALON","Хранители клятвы","Oathkeepers"],["2H_RAM_KEEPER","Хранитель рощи","Grovekeeper"],["2H_SCYTHE_CRYSTAL","Хрустальный жнец","Crystal Reaper"],["2H_CLAYMORE_AVALON","Царетворец","Kingmaker"],["2H_POLEHAMMER","Чекан","Polehammer"],["2H_IRONGAUNTLETS_HELL","Черные перчатки","Black Hands"],["2H_LONGBOW_UNDEAD","Шепчущий лук","Whispering Bow"],["2H_KNUCKLES_SET3","Шипастые рукавицы","Spiked Gauntlets"]];
+const CATM={};CAT.forEach(c=>{CATM[c[1].toLowerCase()]=c;CATM[c[2].toLowerCase()]=c});
+const findCat=n=>CATM[String(n).trim().toLowerCase()]||null;
+function glyph(k){const R=[['QUARTERSTAFF','\u{1F962}'],['STAFF','\u{1FA84}'],['CROSSBOW','\u{1F3F9}'],['BOW','\u{1F3F9}'],['AXE','\u{1FA93}'],['HAMMER','\u{1F528}'],['MACE','\u{1F528}'],['FLAIL','\u26D3\uFE0F'],['SPEAR','\u{1F531}'],['PIKE','\u{1F531}'],['GLAIVE','\u{1F531}'],['TRIDENT','\u{1F531}'],['DAGGER','\u{1F5E1}\uFE0F'],['KNUCKLES','\u{1F94A}'],['SHAPESHIFTER','\u{1F43E}'],['NATURE','\u{1F33F}'],['SWORD','\u2694\uFE0F']];for(const r of R)if(k.includes(r[0]))return r[1];return '\u2694\uFE0F'}
+const ic=i=>{const h=i.key?null:findCat(i.name);const k=i.key||(h&&h[0])||'';const g=glyph(k);if(!k)return g;return '<img class="ico" loading="lazy" alt="" src="https://render.albiononline.com/v1/item/T'+i.tier+'_'+k+(i.ench>0?'@'+i.ench:'')+'.png?size=64" onerror="this.replaceWith(document.createTextNode(\''+g+'\'))">'};
+let S=load(),tab='walk',armed=null,ioText=null;
+function def(){let n=0;const it=[['Призыватель теней',5,3],['Кровопускатель',6,3],['Призма вечного холода',5,3],['Призма вечного холода',6,3],['Леденящий вой',5,3],['Леденящий вой',6,2]].map(([name,tier,ench])=>({id:'i'+(++n),name,tier,ench}));return{items:it,need:{},batch:5,seq:n}}
+function load(){try{const r=localStorage.getItem(K);if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.items)&&o.need)return o}}catch(e){}return def()}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const lab=i=>'<span class="ic">'+ic(i)+'</span>'+esc(i.name)+' <b>'+i.tier+'.'+i.ench+'</b>';
+const get=(i,c)=>(S.need[i]&&S.need[i][c])||0;
+function set(i,c,v){v=Math.max(0,Math.min(999,Math.floor(+v)||0));(S.need[i]=S.need[i]||{})[c]=v}
+const rowTot=i=>CITIES.reduce((a,c)=>a+get(i,c.id),0);
+const colTot=c=>S.items.reduce((a,i)=>a+get(i.id,c),0);
+
+function render(){
+  const T=[['walk','Обход'],['plan','Что завести'],['cities','По городам'],['targets','Цели'],['items','Товары']];
+  document.getElementById('tabs').innerHTML=T.map(([k,t])=>`<button class="tab${tab===k?' on':''}" data-a="tab" data-k="${k}">${t}</button>`).join('');
+  document.getElementById('view').innerHTML=({walk:vWalk,plan:vPlan,cities:vCities,targets:vTargets,items:vItems})[tab]();
+}
+const dT=()=>S.defT==null?5:S.defT;
+function tget(i,c){const v=S.tg&&S.tg[i]&&S.tg[i][c];return v==null?dT():v}
+function tset(i,c,v){v=Math.max(0,Math.min(999,Math.floor(+v)||0));S.tg=S.tg||{};(S.tg[i]=S.tg[i]||{})[c]=v}
+function sget(i,c){const v=S.sk&&S.sk[i]&&S.sk[i][c];return v==null?null:v}
+function sset(i,c,v){S.sk=S.sk||{};S.sk[i]=S.sk[i]||{};if(v===''||v==null){delete S.sk[i][c];set(i,c,0)}else{v=Math.max(0,Math.min(999,Math.floor(+v)||0));S.sk[i][c]=v;set(i,c,Math.max(0,tget(i,c)-v))}}
+function walkUpd(i,c){const s=sget(i,c),t=tget(i,c);const el=document.querySelector('input.sk[data-i="'+i+'"][data-c="'+c+'"]');if(el)el.classList.toggle('has',s!=null&&s<t);document.querySelectorAll('[data-rt]').forEach(x=>x.textContent=rowTot(x.dataset.rt));document.querySelectorAll('[data-ct]').forEach(x=>x.textContent=colTot(x.dataset.ct));const sm=document.getElementById('sum');if(sm)sm.outerHTML=summary()}
+const sm0='width:60px;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--tx);text-align:center;font:inherit';
+function vWalk(){
+  if(!S.items.length)return '<div class="card muted">Добавь товары на вкладке «Товары».</div>';
+  const head=CITIES.map(c=>`<th><span class="dot" style="background:${c.c}"></span>${c.n}<br><button class="btn" data-a="empty" data-c="${c.id}" style="margin-top:4px;font-size:11px;padding:2px 6px">пусто</button></th>`).join('');
+  const rows=S.items.map(i=>`<tr><td>${lab(i)}</td>${CITIES.map(c=>{const t=tget(i.id,c.id),s=sget(i.id,c.id);return t?`<td><div class="cell"><input type="number" min="0" class="sk${s!=null&&s<t?' has':''}" value="${s==null?'':s}" placeholder="—" data-i="${i.id}" data-c="${c.id}" inputmode="numeric"><span class="hint">/${t}</span></div></td>`:'<td class="muted">—</td>'}).join('')}<td class="tot" data-rt="${i.id}">${rowTot(i.id)}</td></tr>`).join('');
+  const foot=`<tr><td class="muted">Завезти в город</td>${CITIES.map(c=>`<td class="tot" data-ct="${c.id}">${colTot(c.id)}</td>`).join('')}<td></td></tr>`;
+  return summary()+`<div class="card"><p class="muted" style="margin:0 0 10px">Вводи, сколько штук осталось на рынке в каждом городе (цель стоит справа от поля). Пустое поле — город ещё не обходил. Недостача считается сама и попадает в «Что завести» и «По городам».</p><div class="tools" style="margin-bottom:10px"><button class="btn" data-a="clrstock">Новая неделя: очистить остатки</button></div><div class="scroll"><table><thead><tr><th style="text-align:left">Товар</th>${head}<th>Завезти</th></tr></thead><tbody>${rows}${foot}</tbody></table></div></div>`;
+}
+function vTargets(){
+  if(!S.items.length)return '<div class="card muted">Добавь товары на вкладке «Товары».</div>';
+  const head=CITIES.map(c=>`<th><span class="dot" style="background:${c.c}"></span>${c.n}</th>`).join('');
+  const rows=S.items.map(i=>`<tr><td>${lab(i)}</td>${CITIES.map(c=>`<td><div class="cell"><input type="number" min="0" class="tg" value="${tget(i.id,c.id)}" data-i="${i.id}" data-c="${c.id}" inputmode="numeric"></div></td>`).join('')}<td><input type="number" min="0" class="rowt" placeholder="всем" data-i="${i.id}" style="${sm0}"></td></tr>`).join('');
+  return `<div class="card"><div class="tools" style="margin-bottom:10px"><label class="muted">Цель по умолчанию: <input type="number" min="0" id="deft" value="${dT()}" style="${sm0}"></label><span class="muted">шт. на рынок. 0 — в этот город товар не возить.</span></div><div class="scroll"><table><thead><tr><th style="text-align:left">Товар</th>${head}<th>Всем</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+const whOf=i=>{const w=S.wh&&S.wh[i.id];return CITIES.some(c=>c.id===w)?w:null};
+const cn=id=>(CITIES.find(c=>c.id===id)||{}).n;
+function groups(list){const m=[];CITIES.forEach(c=>{const g=list.filter(i=>whOf(i)===c.id);if(g.length)m.push([c.id,g])});const r=list.filter(i=>!whOf(i));if(r.length)m.push([null,r]);return m}
+function summary(){
+  const ml=S.items.filter(i=>rowTot(i.id)>0),hw=S.items.some(whOf);const ch=groups(ml).map(([w,g])=>(hw?`<div class="muted" style="margin:8px 0 4px;font-size:13px">${w?'Склад: '+cn(w):'Склад не указан'}</div>`:'')+`<div class="chips">${g.map(i=>`<span class="chip">${lab(i)} × <b>${rowTot(i.id)}</b></span>`).join('')}</div>`).join('');
+  return `<div class="card" id="sum"><h2>Всего взять со склада</h2>${ch||'<span class="muted">Пока ничего не выбрано</span>'}</div>`;
+}
+function vPlan(){
+  if(!S.items.length)return '<div class="card muted">Добавь товары на вкладке «Товары».</div>';
+  const head=CITIES.map(c=>`<th><span class="dot" style="background:${c.c}"></span>${c.n}</th>`).join('');
+  const rows=S.items.map(i=>`<tr><td>${lab(i)}</td>${CITIES.map(c=>{const v=get(i.id,c.id);return `<td><div class="cell"><button data-a="dec" data-i="${i.id}" data-c="${c.id}">−</button><input type="number" min="0" class="q${v?' has':''}" value="${v}" data-i="${i.id}" data-c="${c.id}" inputmode="numeric"><button data-a="inc" data-i="${i.id}" data-c="${c.id}">+</button></div></td>`}).join('')}<td class="tot">${rowTot(i.id)}</td><td><button class="btn" data-a="all" data-i="${i.id}" title="Добавить шаг во все города">+ всем</button></td></tr>`).join('');
+  const foot=`<tr><td class="muted">Итого в город</td>${CITIES.map(c=>`<td class="tot">${colTot(c.id)}</td>`).join('')}<td class="tot">${S.items.reduce((a,i)=>a+rowTot(i.id),0)}</td><td></td></tr>`;
+  return summary()+`<div class="card"><div class="tools" style="margin-bottom:10px"><label class="muted">Шаг кнопок +/−: <input type="number" min="1" value="${S.batch}" id="batch" style="width:56px;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--tx);text-align:center;font:inherit"></label><button class="btn" data-a="reset">Сбросить все количества</button></div><div class="scroll"><table><thead><tr><th style="text-align:left">Товар</th>${head}<th>Всего</th><th></th></tr></thead><tbody>${rows}${foot}</tbody></table></div></div>`;
+}
+function vCities(){
+  const cards=CITIES.map(c=>{
+    const li=groups(S.items).flatMap(g=>g[1]).filter(i=>get(i.id,c.id)>0).map(i=>`<li><span class="n">${lab(i)}${whOf(i)?`<br><span class="hint">${whOf(i)===c.id?'склад в этом городе':'взять: '+cn(whOf(i))}</span>`:''}</span><span class="q">×${get(i.id,c.id)}</span><button class="btn ok" data-a="done" data-i="${i.id}" data-c="${c.id}">✓ завёз</button></li>`).join('');
+    return `<div class="city"><header><span><span class="dot" style="background:${c.c}"></span>${c.n}</span><span class="muted">${colTot(c.id)} шт.</span></header>${li?`<ul>${li}</ul><footer><button class="btn" data-a="doneall" data-c="${c.id}">Весь город завезён</button></footer>`:'<div class="empty">Ничего везти не нужно</div>'}</div>`}).join('');
+  return summary()+`<div class="grid">${cards}</div>`;
+}
+function vItems(){
+  const list=S.items.map(i=>`<div class="row"><span>${lab(i)}</span><select class="wh" data-i="${i.id}" style="margin-left:auto;height:32px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;padding:0 6px"><option value="">Склад: не указан</option>${CITIES.map(c=>`<option value="${c.id}"${whOf(i)===c.id?' selected':''}>${c.n}</option>`).join('')}</select><button class="btn del" data-a="rm" data-i="${i.id}">${armed===i.id?'Точно удалить?':'Удалить'}</button></div>`).join('')||'<span class="muted">Список пуст</span>';
+  const opts=CAT.map(c=>`<option value="${esc(c[1])}" label="${esc(c[2])}">`).join('');
+  const t=[4,5,6,7,8].map(x=>`<option${x===5?' selected':''}>${x}</option>`).join('');
+  const e=[0,1,2,3,4].map(x=>`<option${x===3?' selected':''}>${x}</option>`).join('');
+  return `<div class="card"><h2>Добавить товар</h2><div class="form"><label>Название<input id="nn" list="pl" placeholder="Начни вводить и выбери из списка" autocomplete="off"></label><datalist id="pl">${opts}</datalist><label>Тир<select id="nt">${t}</select></label><label>Зачарование<select id="ne">${e}</select></label><button class="btn pri" data-a="add" style="height:36px">Добавить</button></div></div>
+<div class="card"><h2>Мои товары</h2>${list}</div>
+<div class="card"><h2>Резервная копия</h2><div class="tools"><button class="btn" data-a="export">Экспорт</button><button class="btn" data-a="import">Импорт</button></div>${ioText!==null?`<textarea id="io" placeholder="Вставь сюда сохранённые данные и нажми «Применить»">${esc(ioText)}</textarea><button class="btn pri" data-a="apply" style="margin-top:8px">Применить</button>`:''}</div>`;
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const a=b.dataset.a,i=b.dataset.i,c=b.dataset.c,st=S.batch||5;
+  if(a==='tab'){tab=b.dataset.k;armed=null}
+  else if(a==='inc')set(i,c,get(i,c)+st);
+  else if(a==='dec')set(i,c,get(i,c)-st);
+  else if(a==='all')CITIES.forEach(x=>set(i,x.id,get(i,x.id)+st));
+  else if(a==='done'){set(i,c,0);if(S.sk&&S.sk[i])delete S.sk[i][c]}
+  else if(a==='doneall')S.items.forEach(x=>{set(x.id,c,0);if(S.sk&&S.sk[x.id])delete S.sk[x.id][c]});
+  else if(a==='reset'){if(armed==='reset'){S.need={};S.sk={};armed=null}else{armed='reset';b.textContent='Точно сбросить?';return}}
+  else if(a==='rm'){if(armed===i){S.items=S.items.filter(x=>x.id!==i);delete S.need[i];armed=null}else armed=i}
+  else if(a==='add'){const n=document.getElementById('nn').value.trim();if(!n)return;const h=findCat(n);S.seq=(S.seq||0)+1;S.items.push({id:'i'+S.seq+'_'+Date.now().toString(36),name:h?h[1]:n,key:h?h[0]:null,tier:+document.getElementById('nt').value,ench:+document.getElementById('ne').value})}
+  else if(a==='empty')S.items.forEach(x=>{if(tget(x.id,c)>0)sset(x.id,c,0)});
+  else if(a==='clrstock')S.sk={};
+  else if(a==='export')ioText=JSON.stringify(S);
+  else if(a==='import')ioText='';
+  else if(a==='apply'){try{const o=JSON.parse(document.getElementById('io').value);if(o&&Array.isArray(o.items)&&o.need){S=o;ioText=null}}catch(x){return}}
+  save();render();
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='batch'){S.batch=Math.max(1,Math.floor(+t.value)||5);save();render();return}
+  if(t.classList.contains('q')){set(t.dataset.i,t.dataset.c,t.value);save();render();return}
+  if(t.classList.contains('wh')){S.wh=S.wh||{};S.wh[t.dataset.i]=t.value;save();return}
+  if(t.classList.contains('sk')){sset(t.dataset.i,t.dataset.c,t.value);save();walkUpd(t.dataset.i,t.dataset.c);return}
+  if(t.classList.contains('tg')){tset(t.dataset.i,t.dataset.c,t.value);save();return}
+  if(t.classList.contains('rowt')){if(t.value!==''){CITIES.forEach(c=>tset(t.dataset.i,c.id,t.value));save();render()}return}
+  if(t.id==='deft'){S.defT=Math.max(0,Math.floor(+t.value)||0);save();render()}
+});
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('sk')){sset(t.dataset.i,t.dataset.c,t.value);save();walkUpd(t.dataset.i,t.dataset.c)}});
+render();
+</script>
+</body>
+</html>
