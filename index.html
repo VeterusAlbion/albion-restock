@@ -100,9 +100,9 @@ const rowTot=i=>CITIES.reduce((a,c)=>a+get(i,c.id),0);
 const colTot=c=>S.items.reduce((a,i)=>a+get(i.id,c),0);
 
 function render(){
-  const T=[['walk','Обход'],['plan','Что завести'],['cities','По городам'],['targets','Цели'],['items','Товары']];
+  const T=[['walk','Обход'],['plan','Что завести'],['cities','По городам'],['targets','Цели'],['items','Товары'],['stats','Статистика']];
   document.getElementById('tabs').innerHTML=T.map(([k,t])=>`<button class="tab${tab===k?' on':''}" data-a="tab" data-k="${k}">${t}</button>`).join('');
-  document.getElementById('view').innerHTML=({walk:vWalk,plan:vPlan,cities:vCities,targets:vTargets,items:vItems})[tab]();
+  document.getElementById('view').innerHTML=({walk:vWalk,plan:vPlan,cities:vCities,targets:vTargets,items:vItems,stats:vStats})[tab]();
 }
 const dT=()=>S.defT==null?5:S.defT;
 function tget(i,c){const v=S.tg&&S.tg[i]&&S.tg[i][c];return v==null?dT():v}
@@ -127,6 +127,31 @@ function vTargets(){
 const whOf=i=>{const w=S.wh&&S.wh[i.id];return CITIES.some(c=>c.id===w)?w:null};
 const cn=id=>(CITIES.find(c=>c.id===id)||{}).n;
 function groups(list){const m=[];CITIES.forEach(c=>{const g=list.filter(i=>whOf(i)===c.id);if(g.length)m.push([c.id,g])});const r=list.filter(i=>!whOf(i));if(r.length)m.push([null,r]);return m}
+function logDel(i,c){const n=get(i,c);if(n>0){(S.log=S.log||[]).push([Date.now(),i,c,n]);if(S.log.length>5000)S.log.splice(0,S.log.length-5000)}}
+function vStats(){
+  const P=S.statP==null?90:S.statP,from=P>0?Date.now()-P*864e5:0;
+  const ok=e=>S.items.some(x=>x.id===e[1]);
+  const L=(S.log||[]).filter(e=>e[0]>=from&&ok(e));
+  const sel='<select id="sp" style="height:32px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;padding:0 6px">'+[[30,'30 дней'],[90,'90 дней'],[0,'всё время']].map(([v,t])=>'<option value="'+v+'"'+(v===P?' selected':'')+'>'+t+'</option>').join('')+'</select>';
+  const top='<div class="card"><div class="tools"><span class="muted">Период:</span>'+sel+'<button class="btn" data-a="clog" style="margin-left:auto">Очистить статистику</button></div></div>';
+  if(!L.length)return top+'<div class="card muted">Пока нет данных. Статистика копится, когда во вкладке «По городам» вы нажимаете «✓ завёз».</div>';
+  const m={},ct={};CITIES.forEach(c=>ct[c.id]={q:0,n:0});
+  L.forEach(([t,i,c,q])=>{if(!ct[c])return;const a=((m[i]=m[i]||{})[c]=m[i][c]||{q:0,n:0,t:[]});a.q+=q;a.n++;a.t.push(t);ct[c].q+=q;ct[c].n++});
+  const iv=a=>a.t.length>1?Math.round((Math.max(...a.t)-Math.min(...a.t))/(a.t.length-1)/864e5*10)/10:null;
+  const cr=CITIES.slice().sort((a,b)=>ct[b.id].q-ct[a.id].q),mx=Math.max(1,ct[cr[0].id].q);
+  const cityCard='<div class="card"><h2>Куда больше всего завозили</h2>'+cr.map(c=>'<div class="row"><span style="min-width:120px"><span class="dot" style="background:'+c.c+'"></span>'+c.n+'</span><span style="flex:1;background:var(--bg);border-radius:6px;height:14px;overflow:hidden"><span style="display:block;height:100%;width:'+Math.round(ct[c.id].q/mx*100)+'%;background:'+c.c+'"></span></span><span style="min-width:110px;text-align:right"><b>'+ct[c.id].q+'</b> шт. · '+ct[c.id].n+' раз</span></div>').join('')+'</div>';
+  const its=S.items.filter(i=>m[i.id]);
+  let mc=1;its.forEach(i=>CITIES.forEach(c=>{const a=m[i.id][c.id];if(a&&a.q>mc)mc=a.q}));
+  const head=CITIES.map(c=>'<th><span class="dot" style="background:'+c.c+'"></span>'+c.n+'</th>').join('');
+  const rows=its.map(i=>{let best=null;CITIES.forEach(c=>{const a=m[i.id][c.id];if(a&&(!best||a.q>best[1].q||(a.q===best[1].q&&a.n>best[1].n)))best=[c,a]});
+    const cells=CITIES.map(c=>{const a=m[i.id][c.id];if(!a)return '<td class="muted">—</td>';const f=iv(a);return '<td title="'+a.n+' завозов'+(f?', в среднем раз в '+f+' дн.':'')+'" style="background:color-mix(in srgb,var(--acc) '+Math.round(a.q/mc*55)+'%,transparent)"><b>'+a.q+'</b><div class="hint" style="text-align:center;line-height:1.1">'+a.n+' раз</div></td>'}).join('');
+    const f=iv(best[1]);
+    return '<tr><td>'+lab(i)+'</td>'+cells+'<td style="text-align:left">'+best[0].n+' <span class="hint">'+best[1].q+' шт.'+(f?', раз в '+f+' дн.':'')+'</span></td></tr>'}).join('');
+  const mat='<div class="card"><h2>Что и куда завозили</h2><p class="muted" style="margin:0 0 8px;font-size:13px">Чем больше завозите в город, тем лучше там раскупают. Цвет показывает объём, под числом — сколько раз завозили.</p><div class="scroll"><table><thead><tr><th style="text-align:left">Товар</th>'+head+'<th style="text-align:left">Лучше всего уходит</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  const rec=(S.log||[]).map((e,k)=>[e,k]).filter(([e])=>ok(e)&&ct[e[2]]).slice(-8).reverse();
+  const recCard='<div class="card"><h2>Последние завозы</h2>'+rec.map(([e,k])=>{const it=S.items.find(x=>x.id===e[1]);return '<div class="row"><span class="muted" style="min-width:60px">'+new Date(e[0]).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+'</span><span style="flex:1">'+lab(it)+'</span><span>'+cn(e[2])+' · <b>'+e[3]+'</b></span><button class="btn del" data-a="dellog" data-k="'+k+'">✕</button></div>'}).join('')+'</div>';
+  return top+cityCard+mat+recCard;
+}
 function summary(){
   const ml=S.items.filter(i=>rowTot(i.id)>0),hw=S.items.some(whOf);const ch=groups(ml).map(([w,g])=>(hw?`<div class="muted" style="margin:8px 0 4px;font-size:13px">${w?'Склад: '+cn(w):'Склад не указан'}</div>`:'')+`<div class="chips">${g.map(i=>`<span class="chip">${lab(i)} × <b>${rowTot(i.id)}</b></span>`).join('')}</div>`).join('');
   return `<div class="card" id="sum"><h2>Всего взять со склада</h2>${ch||'<span class="muted">Пока ничего не выбрано</span>'}</div>`;
@@ -160,13 +185,15 @@ document.addEventListener('click',e=>{
   else if(a==='inc')set(i,c,get(i,c)+(tget(i,c)||st));
   else if(a==='dec')set(i,c,get(i,c)-(tget(i,c)||st));
   else if(a==='all')CITIES.forEach(x=>set(i,x.id,get(i,x.id)+(tget(i,x.id)||st)));
-  else if(a==='done'){set(i,c,0);if(S.sk&&S.sk[i])delete S.sk[i][c]}
-  else if(a==='doneall')S.items.forEach(x=>{set(x.id,c,0);if(S.sk&&S.sk[x.id])delete S.sk[x.id][c]});
+  else if(a==='done'){logDel(i,c);set(i,c,0);if(S.sk&&S.sk[i])delete S.sk[i][c]}
+  else if(a==='doneall')S.items.forEach(x=>{logDel(x.id,c);set(x.id,c,0);if(S.sk&&S.sk[x.id])delete S.sk[x.id][c]});
   else if(a==='reset'){if(armed==='reset'){S.need={};S.sk={};armed=null}else{armed='reset';b.textContent='Точно сбросить?';return}}
   else if(a==='rm'){if(armed===i){S.items=S.items.filter(x=>x.id!==i);delete S.need[i];armed=null}else armed=i}
   else if(a==='add'){const n=document.getElementById('nn').value.trim();if(!n)return;const h=findCat(n);S.seq=(S.seq||0)+1;S.items.push({id:'i'+S.seq+'_'+Date.now().toString(36),name:h?h[1]:n,key:h?h[0]:null,tier:+document.getElementById('nt').value,ench:+document.getElementById('ne').value})}
   else if(a==='empty')S.items.forEach(x=>{if(tget(x.id,c)>0)sset(x.id,c,0)});
   else if(a==='clrstock')S.sk={};
+  else if(a==='clog'){if(armed==='clog'){S.log=[];armed=null}else{armed='clog';b.textContent='Точно очистить?';return}}
+  else if(a==='dellog'){(S.log||[]).splice(+b.dataset.k,1)}
   else if(a==='export')ioText=JSON.stringify(S);
   else if(a==='import')ioText='';
   else if(a==='apply'){try{const o=JSON.parse(document.getElementById('io').value);if(o&&Array.isArray(o.items)&&o.need){S=o;ioText=null}}catch(x){return}}
@@ -176,6 +203,7 @@ document.addEventListener('change',e=>{
   const t=e.target;
   if(t.id==='batch'){S.batch=Math.max(1,Math.floor(+t.value)||5);save();render();return}
   if(t.classList.contains('q')){set(t.dataset.i,t.dataset.c,t.value);save();render();return}
+  if(t.id==='sp'){S.statP=+t.value;save();render();return}
   if(t.classList.contains('wh')){S.wh=S.wh||{};S.wh[t.dataset.i]=t.value;save();return}
   if(t.classList.contains('sk')){sset(t.dataset.i,t.dataset.c,t.value);save();walkUpd(t.dataset.i,t.dataset.c);return}
   if(t.classList.contains('tg')){tset(t.dataset.i,t.dataset.c,t.value);save();return}
