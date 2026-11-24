@@ -136,7 +136,7 @@ function vPlan(){
   const head=CITIES.map(c=>`<th><span class="dot" style="background:${c.c}"></span>${c.n}</th>`).join('');
   const rows=S.items.map(i=>`<tr><td>${lab(i)}</td>${CITIES.map(c=>{const v=get(i.id,c.id);return `<td><div class="cell"><button data-a="dec" data-i="${i.id}" data-c="${c.id}">−</button><input type="number" min="0" class="q${v?' has':''}" value="${v}" data-i="${i.id}" data-c="${c.id}" inputmode="numeric"><button data-a="inc" data-i="${i.id}" data-c="${c.id}">+</button></div></td>`}).join('')}<td class="tot">${rowTot(i.id)}</td><td><button class="btn" data-a="all" data-i="${i.id}" title="Добавить шаг во все города">+ всем</button></td></tr>`).join('');
   const foot=`<tr><td class="muted">Итого в город</td>${CITIES.map(c=>`<td class="tot">${colTot(c.id)}</td>`).join('')}<td class="tot">${S.items.reduce((a,i)=>a+rowTot(i.id),0)}</td><td></td></tr>`;
-  return summary()+`<div class="card"><div class="tools" style="margin-bottom:10px"><label class="muted">Шаг кнопок +/−: <input type="number" min="1" value="${S.batch}" id="batch" style="width:56px;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--tx);text-align:center;font:inherit"></label><button class="btn" data-a="reset">Сбросить все количества</button></div><div class="scroll"><table><thead><tr><th style="text-align:left">Товар</th>${head}<th>Всего</th><th></th></tr></thead><tbody>${rows}${foot}</tbody></table></div></div>`;
+  return summary()+`<div class="card"><div class="tools" style="margin-bottom:10px"><label class="muted">Шаг, если цель = 0: <input type="number" min="1" value="${S.batch}" id="batch" style="width:56px;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--tx);text-align:center;font:inherit"></label><button class="btn" data-a="reset">Сбросить все количества</button></div><div class="scroll"><table><thead><tr><th style="text-align:left">Товар</th>${head}<th>Всего</th><th></th></tr></thead><tbody>${rows}${foot}</tbody></table></div></div>`;
 }
 function vCities(){
   const cards=CITIES.map(c=>{
@@ -157,9 +157,9 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;
   const a=b.dataset.a,i=b.dataset.i,c=b.dataset.c,st=S.batch||5;
   if(a==='tab'){tab=b.dataset.k;armed=null}
-  else if(a==='inc')set(i,c,get(i,c)+st);
-  else if(a==='dec')set(i,c,get(i,c)-st);
-  else if(a==='all')CITIES.forEach(x=>set(i,x.id,get(i,x.id)+st));
+  else if(a==='inc')set(i,c,get(i,c)+(tget(i,c)||st));
+  else if(a==='dec')set(i,c,get(i,c)-(tget(i,c)||st));
+  else if(a==='all')CITIES.forEach(x=>set(i,x.id,get(i,x.id)+(tget(i,x.id)||st)));
   else if(a==='done'){set(i,c,0);if(S.sk&&S.sk[i])delete S.sk[i][c]}
   else if(a==='doneall')S.items.forEach(x=>{set(x.id,c,0);if(S.sk&&S.sk[x.id])delete S.sk[x.id][c]});
   else if(a==='reset'){if(armed==='reset'){S.need={};S.sk={};armed=null}else{armed='reset';b.textContent='Точно сбросить?';return}}
