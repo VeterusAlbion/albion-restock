@@ -79,10 +79,14 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8
 .hdr .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28);color:#f4d472}
 @media (max-width:480px){.hdr{padding:10px 12px;gap:10px}.hdr img{width:48px;height:48px}.hdr h1{font-size:18px}}
 .lbox .lg{display:block;margin:0 auto 6px;width:84px;height:84px}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
-<div id="login"><form class="lbox" id="lf"><img data-logo class="lg" alt=""><h1 style="margin-bottom:12px;text-align:center">Вход</h1><input id="em" type="email" placeholder="Почта" autocomplete="username" required><input id="pw" type="password" placeholder="Пароль" autocomplete="current-password" required><div id="le" style="color:#c0392b;font-size:13px;min-height:18px"></div><button class="btn pri" style="width:100%;height:38px">Войти</button><p style="text-align:center;margin:12px 0 0"><a href="#" id="skip" class="muted">Продолжить без входа</a></p></form></div>
+<div id="login"><form class="lbox" id="lf"><img data-logo class="lg" alt=""><h1 style="margin-bottom:12px;text-align:center">Вход</h1><input id="em" type="email" placeholder="Почта" autocomplete="username" required><input id="pw" type="password" placeholder="Пароль" autocomplete="current-password" required><div id="le" style="color:#c0392b;font-size:13px;min-height:18px"></div><button class="btn pri" style="width:100%;height:38px">Войти</button><p style="text-align:center;margin:12px 0 0"><a href="#" id="forgot" class="muted">Забыли пароль?</a></p><p style="text-align:center;margin:8px 0 0"><a href="#" id="skip" class="muted">Продолжить без входа</a></p></form>
+<form class="lbox" id="rf" hidden><img data-logo class="lg" alt=""><h1 style="margin-bottom:6px;text-align:center">Сброс пароля</h1><p class="muted" style="margin:0 0 12px;font-size:13px;text-align:center">Введите почту, и мы отправим ссылку для создания нового пароля.</p><input id="rem" type="email" placeholder="Почта" autocomplete="username" required><div id="rm" style="font-size:13px;min-height:18px;color:#c0392b;margin-bottom:8px"></div><button class="btn pri" style="width:100%;height:38px">Отправить ссылку</button><p style="text-align:center;margin:12px 0 0"><a href="#" class="muted back">Назад ко входу</a></p></form>
+<form class="lbox" id="nf" hidden><img data-logo class="lg" alt=""><h1 style="margin-bottom:12px;text-align:center">Новый пароль</h1><input id="np" type="password" placeholder="Новый пароль (от 6 символов)" autocomplete="new-password" minlength="6" required><input id="np2" type="password" placeholder="Повторите пароль" autocomplete="new-password" required><div id="nm" style="color:#c0392b;font-size:13px;min-height:18px"></div><button class="btn pri" style="width:100%;height:38px">Сохранить пароль</button></form>
+</div>
 <div class="wrap">
 <div class="hdr"><img data-logo alt="" width="64" height="64"><div><h1>Albion — завоз на рынки</h1>
 <div class="sub" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span id="sync">Загрузка…</span><button class="btn" id="authbtn" style="padding:3px 9px;font-size:12px">Войти</button></div></div></div>
@@ -228,6 +232,7 @@ document.addEventListener('change',e=>{
 });
 document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('sk')){sset(t.dataset.i,t.dataset.c,t.value);save();walkUpd(t.dataset.i,t.dataset.c)}});
 const SB_URL='https://dvtelusnunvupreokjnf.supabase.co',SB_KEY='sb_publishable_22psBlzj1bmjY4eHHf7h5g_FEM9YotI';
+const REC=/type=recovery/.test(location.hash);
 let sb=null,uid=null,ready=false,pt=null;
 try{sb=window.supabase.createClient(SB_URL,SB_KEY)}catch(e){}
 const $$=id=>document.getElementById(id);
@@ -253,10 +258,17 @@ async function pull(first){
 }
 async function initAuth(){
   if(!sb){setSync('облако недоступно, данные только на этом устройстве');showLogin('Не удалось загрузить библиотеку входа');return}
+  if(REC){authUI();setSync('введите новый пароль');showLogin();lview('new');return}
   try{const r=await sb.auth.getSession();if(r.data.session){uid=r.data.session.user.id;authUI();await pull(true);return}}catch(e){}
   authUI();setSync('не выполнен вход');showLogin();
 }
 $$('lf').addEventListener('submit',async e=>{e.preventDefault();if(!sb)return;$$('le').textContent='';try{const r=await sb.auth.signInWithPassword({email:$$('em').value.trim(),password:$$('pw').value});if(r.error){$$('le').textContent='Неверная почта или пароль';return}uid=r.data.user.id;hideLogin();authUI();await pull(true)}catch(x){$$('le').textContent='Нет связи с сервером'}});
+function lview(v){$$('lf').hidden=v!=='in';$$('rf').hidden=v!=='reset';$$('nf').hidden=v!=='new'}
+$$('forgot').addEventListener('click',e=>{e.preventDefault();$$('rem').value=$$('em').value;$$('rm').textContent='';lview('reset')});
+document.querySelectorAll('.back').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();lview('in')}));
+$$('rf').addEventListener('submit',async e=>{e.preventDefault();if(!sb)return;const m=$$('rm');m.style.color='var(--mut)';m.textContent='Отправляем…';try{const r=await sb.auth.resetPasswordForEmail($$('rem').value.trim(),{redirectTo:location.origin+location.pathname});if(r.error){m.style.color='#c0392b';m.textContent='Не удалось отправить: '+r.error.message;return}m.style.color='var(--ok)';m.textContent='Готово. Если такая почта зарегистрирована, на неё отправлено письмо со ссылкой.'}catch(x){m.style.color='#c0392b';m.textContent='Нет связи с сервером'}});
+$$('nf').addEventListener('submit',async e=>{e.preventDefault();const a=$$('np').value,m=$$('nm');if(a!==$$('np2').value){m.textContent='Пароли не совпадают';return}m.textContent='';try{const r=await sb.auth.updateUser({password:a});if(r.error){m.textContent='Не удалось сохранить: '+r.error.message;return}history.replaceState(null,'',location.pathname);uid=r.data.user.id;hideLogin();lview('in');authUI();await pull(true)}catch(x){m.textContent='Нет связи с сервером'}});
+if(sb)sb.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY'){showLogin();lview('new')}});
 $$('skip').addEventListener('click',e=>{e.preventDefault();hideLogin();setSync('данные только на этом устройстве');authUI()});
 $$('authbtn').addEventListener('click',async()=>{if(uid){try{await sb.auth.signOut()}catch(e){}uid=null;ready=false;setSync('вы вышли, данные только на этом устройстве');authUI()}else showLogin()});
 $$('sync').style.cursor='pointer';
