@@ -119,7 +119,9 @@ function set(i,c,v){v=Math.max(0,Math.min(999,Math.floor(+v)||0));(S.need[i]=S.n
 const rowTot=i=>CITIES.reduce((a,c)=>a+get(i,c.id),0);
 const colTot=c=>S.items.reduce((a,i)=>a+get(i.id,c),0);
 
+function sortItems(){S.items.sort((a,b)=>a.name.localeCompare(b.name,'ru')||a.tier-b.tier||a.ench-b.ench)}
 function render(){
+  sortItems();
   const T=[['walk','Обход'],['plan','Что завести'],['cities','По городам'],['targets','Цели'],['items','Товары'],['stats','Статистика']];
   document.getElementById('tabs').innerHTML=T.map(([k,t])=>`<button class="tab${tab===k?' on':''}" data-a="tab" data-k="${k}">${t}</button>`).join('');
   document.getElementById('view').innerHTML=({walk:vWalk,plan:vPlan,cities:vCities,targets:vTargets,items:vItems,stats:vStats})[tab]();
